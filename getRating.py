@@ -50,7 +50,7 @@ for stock in stockList: #{
   try:
     bingRsp = urllib2.urlopen('http://www.bing.com/search?q=' + stock + '+ibd')
   except:
-    print "Error on url: " + url
+    print "Resp Error on url: " + url
     quit()
 
   u_bingParser.__init__()
@@ -65,7 +65,7 @@ for stock in stockList: #{
   try:
     ibdRsp = urllib2.urlopen(ibdLink)
   except:
-    print "Error on url: " + ibdLink
+    print "Resp Error on url: " + ibdLink
     quit()
 
   # use html parser

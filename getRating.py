@@ -4,12 +4,12 @@ import sys
 
 from myHTMLParser import ibdParser, bingParser 
 
+_DEBUG_ = False
+startList = 1
+
 if sys.argv[1] == 'DBG':
   _DEBUG_ = True
   startList = 2
-else:
-  _DEBUG_ = False
-  startList = 1
 
 finalResult = []
 
@@ -73,7 +73,8 @@ for stock in stockList: #{
   u_ibdParser.find_rank(stock, ibdRsp.read())
   
   # append result to list of tuples
-  finalResult.append((stock.upper(), u_ibdParser.currStockRank, u_ibdParser.leadingStock))
+  finalResult.append((stock.upper(), u_ibdParser.currStockRank, u_ibdParser.leadingStock,
+                                     u_ibdParser.industryGroup, u_ibdParser.industryRank))
 
 #}
 
@@ -82,13 +83,14 @@ fn = open('result.html', 'w')
 fn.write('<!DOCTYPE html>\n')
 fn.write('<html>\n')
 fn.write('<body>\n')
-fn.write('<table border="1">\n')
+fn.write('<table border="1" cellpadding="5%">\n')
 fn.write('<tr>\n')
-fn.write('<th>Stock</th> <th>Rank</th> <th>Leader</th>\n')
+fn.write('<th>Stock</th> <th>Rank</th> <th>Leader</th> <th>IndGroup</th> <th>IndGroupRank</th>\n')
 fn.write('</tr>\n')
 for res in finalResult:
   fn.write('<tr>\n')
-  fn.write('<td>'+str(res[0])+'</td>' + '<td>'+str(res[1])+'</td>' + '<td>'+str(res[2])+'</td>\n')
+  fn.write('<td>'+res[0]+'</td>' + '<td>'+res[1]+'</td>' + '<td>'+res[2]+'</td>' + 
+           '<td>'+res[3]+'</td>' + '<td>'+res[4]+'</td>' + '\n')
   fn.write('</tr>\n')
 fn.write('</table>\n')
 fn.write('</body>\n')

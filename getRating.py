@@ -4,19 +4,21 @@ import sys
 
 from myHTMLParser import ibdParser, bingParser 
 
-_DEBUG_ = False
-startList = 1
-
 if sys.argv[1] == 'DBG':
   _DEBUG_ = True
-  startList = 2
+  fname = sys.argv[2]
+else:
+  _DEBUG_ = False
+  fname = sys.argv[1]
 
 finalResult = []
 
 #br = mechanize.Browser()
 #br.set_handle_robots(False)
 
-stockList = sys.argv[startList:]
+pfile = open(fname, 'r')
+stockList = pfile.read().split('\n')
+del stockList[-1]
 print "Searching rankings for stock(s):\n -- " + str(stockList)
 
 u_ibdParser = ibdParser()

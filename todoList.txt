@@ -1,0 +1,8 @@
+- search for latest news, put the link on result.html
+
+- support some other statistics from IBD?
+    - eps % change
+    - eps growth rate
+
+- support some other statistics from non-IBD?
+    - forward PE

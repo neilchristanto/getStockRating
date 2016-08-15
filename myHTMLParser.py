@@ -6,12 +6,14 @@ class ibdParser(HTMLParser): #{
 
   _DEBUG_ = False
 
-  # state
+  # state -- the order needs to be in conformant with the ibdResp data list
   STATE_IDLE                  = 0
   STATE_SEARCH_CURR_STOCK     = 1
   STATE_SEARCH_LEAD_STOCK     = 2
-  STATE_SEARCH_INDUSTRY_GROUP = 3
-  STATE_SEARCH_INDUSTRY_RANK  = 4
+  STATE_SEARCH_NEXT_ER        = 3
+  STATE_SEARCH_INDUSTRY_GROUP = 4
+  STATE_SEARCH_INDUSTRY_RANK  = 5
+  STATE_STOP                  = 6
 
   currState = 0
   stockName = ''
@@ -23,8 +25,10 @@ class ibdParser(HTMLParser): #{
   # final variables
   currStockRank = '0'
   leadingStock  = ''
-  industryGroup = ''
-  industryRank  = ''
+  # final variables -- from table
+  industryGroup = []
+  industryRank  = []
+  nextErDate    = []
 
   def __init__(self):
     HTMLParser.__init__(self)
@@ -35,6 +39,12 @@ class ibdParser(HTMLParser): #{
     self.getData = False
     self.currStockRank = 0
     self.leadingStock = ''
+    self.industryGroup = []
+    self.industryRank  = []
+    self.nextErDate    = []
+
+  def is_active(self):
+    return (self.currState > self.STATE_IDLE) and (self.currState < self.STATE_STOP)
 
   """
   overridden methods
@@ -44,7 +54,7 @@ class ibdParser(HTMLParser): #{
   def handle_starttag(self, tag, attrs):
     # turn getData off
     self.getData = False
-    if self.currState == self.STATE_IDLE:
+    if self.is_active() == False:
       return
     
     elif self.currState == self.STATE_SEARCH_CURR_STOCK:
@@ -61,39 +71,35 @@ class ibdParser(HTMLParser): #{
       if tag == 'li':
         self.getData = True
 
-  # If the current state is STATE_SEARCH_CURR_STOCK, get the ranking
-  # If the ranking is not 1, switch state to STATE_SEARCH_LEAD_STOCK
+    elif self.currState == self.STATE_SEARCH_NEXT_ER:
+      if tag == 'li':
+        self.getData = True
+
   # No-data will have "data" be '\n'
+  # Immediately return if getData is False or data is empty (\n)
   def handle_data(self, data):
     if (self.getData == False) or (data == '\n'):
       return
-   
+ 
     if self.currState == self.STATE_SEARCH_CURR_STOCK:
       self.currStockRank = str(data)
       if data != '1':
-        self.currState = self.STATE_SEARCH_LEAD_STOCK
+        self.currState += 1 # next state
       else:
-        self.currState = self.STATE_SEARCH_INDUSTRY_GROUP
+        self.currState += 2 # jump 2 states
 
     elif self.currState == self.STATE_SEARCH_LEAD_STOCK:
       self.leadingStock = str(data)
-      self.currState = self.STATE_SEARCH_INDUSTRY_GROUP
+      self.currState += 1
+
+    elif self.currState == self.STATE_SEARCH_NEXT_ER:
+      self.get_table_data(self.nextErDate, '.*EPS Due Date.*', data)
 
     elif self.currState == self.STATE_SEARCH_INDUSTRY_GROUP:
-      if self.getNextData:
-        self.industryGroup = str(data)
-        self.getNextData = False
-        self.currState = self.STATE_SEARCH_INDUSTRY_RANK
-      if re.match('.*Industry Group.*', data):
-        self.getNextData = True
+      self.get_table_data(self.industryGroup, '.*Industry Group.*', data)
 
     elif self.currState == self.STATE_SEARCH_INDUSTRY_RANK:
-      if self.getNextData:
-        self.industryRank = str(data)
-        self.getNextData = False
-        self.currState = self.STATE_IDLE
-      if re.match('.*Industry Group Rank.*', data):
-        self.getNextData = True
+      self.get_table_data(self.industryRank, '.*Industry Group Rank.*', data)
 
   def handle_endtag(self, tag):
     self.getData = False
@@ -124,9 +130,27 @@ class ibdParser(HTMLParser): #{
           self.getData = True
           break
 
+  # Currently similar to search_curr_stock as it utilizes same data structure
   def search_lead_stock(self, tag, attrs):
     self.search_curr_stock(tag, attrs)
 
+
+  # Get data from HTML table/list format
+  # in1: class variable to be updated
+  # in2: regular expression for matching
+  # in3: data from the HTML
+  def get_table_data(self, var, regex, data):
+    if self.getNextData:
+      var.append(str(data))
+      self.getNextData = False
+      self.currState += 1
+    if re.match(regex, data):
+      self.getNextData = True
+
+
+  # Entry point of the IBD stock result webpage parsing
+  # in1: name of the stock
+  # in2: HTML of the webpage
   def find_rank(self, stockName, txt):
     if self._DEBUG_:
       fn = open('ibdLink_ctn.html', 'w')

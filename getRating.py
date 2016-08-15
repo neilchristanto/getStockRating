@@ -76,7 +76,8 @@ for stock in stockList: #{
   
   # append result to list of tuples
   finalResult.append((stock.upper(), u_ibdParser.currStockRank, u_ibdParser.leadingStock,
-                                     u_ibdParser.industryGroup, u_ibdParser.industryRank))
+                                     u_ibdParser.industryGroup[0], u_ibdParser.industryRank[0],
+                                     u_ibdParser.nextErDate[0]))
 
 #}
 
@@ -87,12 +88,12 @@ fn.write('<html>\n')
 fn.write('<body>\n')
 fn.write('<table border="1" cellpadding="5%">\n')
 fn.write('<tr>\n')
-fn.write('<th>Stock</th> <th>Rank</th> <th>Leader</th> <th>IndGroup</th> <th>IndGroupRank</th>\n')
+fn.write('<th>Stock</th> <th>Rank</th> <th>Leader</th> <th>IndGroup</th> <th>IndGroupRank</th> <th>Next ER</th>\n')
 fn.write('</tr>\n')
 for res in finalResult:
   fn.write('<tr>\n')
   fn.write('<td>'+res[0]+'</td>' + '<td>'+res[1]+'</td>' + '<td>'+res[2]+'</td>' + 
-           '<td>'+res[3]+'</td>' + '<td>'+res[4]+'</td>' + '\n')
+           '<td>'+res[3]+'</td>' + '<td>'+res[4]+'</td>' + '<td>'+res[5]+'</td>' + '\n')
   fn.write('</tr>\n')
 fn.write('</table>\n')
 fn.write('</body>\n')

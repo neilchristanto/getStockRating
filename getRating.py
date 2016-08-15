@@ -56,7 +56,7 @@ for stock in stockList: #{
     quit()
 
   u_bingParser.__init__()
-  u_bingParser.find_link(stock, bingRsp.read())
+  u_bingParser.find_link(stock.lower(), bingRsp.read())
   ibdLink = u_bingParser.ibdLink
  
   if ibdLink == '':
@@ -72,7 +72,7 @@ for stock in stockList: #{
 
   # use html parser
   u_ibdParser.__init__()
-  u_ibdParser.find_rank(stock, ibdRsp.read())
+  u_ibdParser.find_rank(stock.lower(), ibdRsp.read())
   
   # append result to list of tuples
   finalResult.append((stock.upper(), u_ibdParser.currStockRank, u_ibdParser.leadingStock,
@@ -81,7 +81,7 @@ for stock in stockList: #{
 #}
 
 # build html table for the stocks ranking
-fn = open('result.html', 'w')
+fn = open(fname + '_result.html', 'w')
 fn.write('<!DOCTYPE html>\n')
 fn.write('<html>\n')
 fn.write('<body>\n')

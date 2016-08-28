@@ -167,7 +167,7 @@ class ibdParser(HTMLParser): #{
       print stockName + " ranking is " + str(self.currStockRank)
       if self.currStockRank != '1':
         print "Leading stock is " + self.leadingStock
-#}
+#} endclass
 
 
 class bingParser(HTMLParser): #{
@@ -213,4 +213,4 @@ class bingParser(HTMLParser): #{
     self.tagSequence =  [ 'a']
     self.attrSequence = [('href', '.+research\.investors\.com\/stock-quotes.+' + stockName)]
     self.feed(txt)
-#}
+#} endclass
